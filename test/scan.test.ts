@@ -69,6 +69,22 @@ describe("scan (real fixture monorepo)", () => {
     expect(orphan.deadProps).toEqual([]);
   });
 
+  it("does not flag `children` as dead when it's only ever passed as nested JSX content", () => {
+    // Reproduces a real false positive found on a production codebase:
+    // `children` is a prop like any other in the type, but at call sites
+    // it's almost always passed as `<Foo>...</Foo>` nested content, never
+    // as a `children={...}` attribute.
+    const childrenBox = byName("ChildrenBox");
+    expect(childrenBox.status).toBe("analyzed");
+    expect(childrenBox.deadProps.map((p) => p.name)).toEqual(["hint"]);
+  });
+
+  it("still flags `children` as dead when every call site is self-closing", () => {
+    const selfClosing = byName("SelfClosingSlot");
+    expect(selfClosing.status).toBe("analyzed");
+    expect(selfClosing.deadProps.map((p) => p.name)).toEqual(["children"]);
+  });
+
   it("does not report props inherited from an extended/intersected base type", () => {
     // None of the fixture's Props types extend anything, so this is really
     // asserting the own-members restriction doesn't accidentally pull in

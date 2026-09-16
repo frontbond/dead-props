@@ -1,6 +1,6 @@
 {
   "name": "dead-props",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Find component props declared in a *Props interface/type that no JSX call site in the project ever passes — cross-file, TypeScript-aware, monorepo-friendly.",
   "type": "module",
   "main": "./dist/index.js",

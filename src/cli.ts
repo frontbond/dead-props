@@ -13,7 +13,7 @@ program
   .description(
     "Find component props that are declared in a *Props interface/type but never passed by any JSX call site in the project.",
   )
-  .version("0.1.0");
+  .version("0.1.1");
 
 program
   .command("scan")

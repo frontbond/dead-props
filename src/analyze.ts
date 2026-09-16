@@ -34,7 +34,29 @@ export function analyzeUsage(nameNode: Identifier): UsageAnalysis {
         usedProps.add(attr.getNameNode().getText());
       }
     }
+
+    // `children` is almost always passed as nested JSX content
+    // (`<Foo>...</Foo>`), not as a `children={...}` attribute — a
+    // self-closing element (`<Foo />`) can never have nested content, so
+    // this only applies to the opening/closing-tag form.
+    if (Node.isJsxOpeningElement(parent) && hasNonEmptyJsxChildren(parent)) {
+      usedProps.add("children");
+    }
   }
 
   return { usageCount, hasSpread, usedProps };
+}
+
+/** A JsxOpeningElement's sibling closing tag holds the nested content; this
+ * checks whether there's anything there beyond insignificant whitespace
+ * text (indentation/newlines from formatting), which doesn't count as
+ * "children" any more than an empty `<Foo></Foo>` would. */
+function hasNonEmptyJsxChildren(openingElement: Node): boolean {
+  const jsxElement = openingElement.getParent();
+  if (!jsxElement || !Node.isJsxElement(jsxElement)) return false;
+
+  return jsxElement.getJsxChildren().some((child) => {
+    if (Node.isJsxText(child)) return child.getText().trim().length > 0;
+    return true;
+  });
 }
